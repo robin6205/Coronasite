@@ -14,8 +14,8 @@ import numpy as np
 
 #Load DataViz Packages
 import matplotlib.pyplot as plt
-import seaborn as sns
-get_ipython().run_line_magic('matplotlib', 'inline')
+#import seaborn as sns
+#get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 # In[3]:
@@ -23,9 +23,10 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 
 #Load Geopandas
 import geopandas as gpd
-from shapely.geometry import Point, Polygon
-import descartes
-
+#from shapely.geometry import Point, Polygon
+#import descartes
+import io
+import requests
 
 # In[82]:
 
@@ -34,7 +35,7 @@ import descartes
 import time
 import pandas as pd
 import schedule
-timestr = time.strftime("%Y%m%d-%H%M%S")
+#timestr = time.strftime("%Y%m%d-%H%M%S")
 
 confirmed_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
 recovered_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
@@ -42,7 +43,8 @@ death_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/mas
 
 #Function to Fetch and Reshape
 def get_melt_data(data_url,case_type):
-    df = pd.read_csv(data_url)
+    s = requests.get(data_url).content
+    df = pd.read_csv(io.StringIO(s.decode('utf-8')))
     melted_df = df.melt(id_vars=['Province/State', 'Country/Region', 'Lat', 'Long'])
     melted_df.rename(columns={"variable":"Date","value":case_type},inplace=True)
     return melted_df
@@ -54,19 +56,20 @@ def merge_data(confirmed_df, recovered_df, deaths_df):
 
 def fetch_data():
     #"Fetch and Prep"
-    
+
     confirm_df = get_melt_data(confirmed_cases_url, "Confirmed")
     recovered_df = get_melt_data(recovered_cases_url,"Recovered")
     death_df = get_melt_data(death_cases_url,"Deaths")
-    print("Merging Data")
+    #print("Merging Data")
     final_df = merge_data(confirm_df,recovered_df,death_df)
-    print("Preview Data")
-    print(final_df.tail(5))
-    filename = "covid_19_merged_dataset_updated_{}.csv".format(timestr)
-    print("Saving Dataset as {}".format(filename))
+    #print("Preview Data")
+    #print(final_df.tail(5))
+    #now goes to "timestr"
+    filename = "covid_19_merged_dataset_updated_{}.csv".format("now")
+    #print("Saving Dataset as {}".format(filename))
     #final_df.to_csv(filename)
-    print("Finished")
-    print (filename)
+    #print("Finished")
+    #print (filename)
     return [death_df], [recovered_df], [confirm_df], [final_df]
 #task
 # schedule.every(5).seconds.do(fetch_data)
@@ -86,30 +89,30 @@ if __name__ == "__main__":
 
 
 #death_df.dtypes
-final_df.shape
+#final_df.shape
 
 
 # In[31]:
 
 
 #First 10
-final_df.head(10)
+    #print(final_df.head(10))
 
 
 # In[33]:
 
 
-final_df.isna().sum()
+#final_df.isna().sum()
 
 
 # In[35]:
 
 
-final_df.describe()
+    print(final_df.describe())
 
 
 # In[42]:
-
+"""
 
 #Number of Case Per Date/Day
 df = final_df
@@ -280,7 +283,7 @@ world.geometry.boundary.plot(color=None,edgecolor='k',linewidth=2,ax=ax)
 
 
 #Per Country
-world 
+world
 
 
 # In[122]:
@@ -486,6 +489,4 @@ df_by_date[['Confirmed', 'Recovered', 'Deaths']].plot(kind='line',figsize=(20,10
 
 # In[ ]:
 
-
-
-
+"""
