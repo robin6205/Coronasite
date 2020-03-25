@@ -43,7 +43,7 @@ death_cases_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/mas
 
 #Function to Fetch and Reshape
 def get_melt_data(data_url,case_type):
-    s = requests.get(data_url).content
+    s = requests.get(data_url,verify=True).content
     df = pd.read_csv(io.StringIO(s.decode('utf-8')))
     melted_df = df.melt(id_vars=['Province/State', 'Country/Region', 'Lat', 'Long'])
     melted_df.rename(columns={"variable":"Date","value":case_type},inplace=True)
