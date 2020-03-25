@@ -32,9 +32,16 @@ def get_melt_data(data_url,case_type):
 
 
 def merge_data(confirmed_df, recovered_df, deaths_df):
-    news_df = confirmed_df.merge(recovered_df)
-    new_df = news_df.merge(deaths_df)
+    news_df = confirmed_df.merge(recovered_df, sort=False)
+    new_df = news_df.merge(deaths_df, sort=False)
     return new_df
+
+def convertlabel(final_df):
+    final_df.rename(columns={"Province/State":"Province_State","Country/Region":"Country_Region"},inplace=True)
+    final_df = ','.join([i for i in final_df]) \
+        .replace("/", "-")
+    print('Replaced')
+    return final_df
 
 
 # In[27]:
@@ -42,17 +49,18 @@ def merge_data(confirmed_df, recovered_df, deaths_df):
 
 def fetch_data():
     #"Fetch and Prep"
-    
+
     confirm_df = get_melt_data(confirmed_cases_url, "Confirmed")
     recovered_df = get_melt_data(recovered_cases_url,"Recovered")
     death_df = get_melt_data(death_cases_url,"Deaths")
     print("Merging Data")
     final_df = merge_data(confirm_df,recovered_df,death_df)
+    #final_df.replace(to_replace = '/', value = '-')
     print("Preview Data")
     print(final_df.tail(5))
-    filename = "covid_19_merged_dataset_updated_{}.csv".format(timestr)
+    filename = "covid_19_merged_dataset_updated_{}.csv".format('now')
     print("Saving Dataset as {}".format(filename))
-    final_df.to_csv(filename)
+    final_df.to_csv(filename,mode = 'w', index=False)
     print("Finished")
 
 
@@ -60,14 +68,10 @@ def fetch_data():
 
 
 #task
-schedule.every(5).seconds.do(fetch_data)
+schedule.every(1).seconds.do(fetch_data)
 while True:
     schedule.run_pending()
     time.sleep(1)
 
 
 # In[ ]:
-
-
-
-
